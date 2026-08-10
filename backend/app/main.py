@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import db
-from .state_machine import RailwayCrossing
+from .state_machine import RailwayCrossing, State
 
 app = FastAPI(title="Automated Railway Level Crossing API")
 
@@ -51,10 +51,32 @@ async def get_logs(limit: int = 50):
     return await db.fetch_logs(limit)
 
 
+async def _broadcast_snapshot():
+    payload = crossing.snapshot()
+    dead = []
+    for ws in connected_sockets:
+        try:
+            await ws.send_json(payload)
+        except Exception:
+            dead.append(ws)
+    for ws in dead:
+        connected_sockets.remove(ws)
+
+
+async def _eta_ticker():
+    """Innovation feature: broadcasts a live countdown every 0.2s while the
+    gate is closing, so the dashboard shows 'closing in 1.4s...' instead of
+    just jumping between states."""
+    while crossing.state in (State.TRAIN_APPROACHING, State.GATE_CLOSING):
+        await _broadcast_snapshot()
+        await asyncio.sleep(0.2)
+
+
 @app.post("/api/event")
 async def post_event(payload: dict):
     event_type = payload.get("type")
     if event_type == "arrival":
+        asyncio.create_task(_eta_ticker())
         return await crossing.handle_arrival()
     elif event_type == "departure":
         return await crossing.handle_departure()
@@ -71,6 +93,7 @@ async def demo_start():
 
 
 async def _run_demo():
+    asyncio.create_task(_eta_ticker())
     await crossing.handle_arrival()
     await asyncio.sleep(2.0)  # simulate train visibly "crossing" before departure
     await crossing.handle_departure()

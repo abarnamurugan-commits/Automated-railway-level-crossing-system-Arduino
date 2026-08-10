@@ -46,6 +46,12 @@ h2 { font-size: 16px; font-weight: 500; margin: 24px 0 12px; }
   transition: background 0.3s ease;
 }
 
+.eta {
+  font-size: 13px;
+  color: #ba7517;
+  font-weight: 500;
+}
+
 .gate-wrap {
   display: flex;
   align-items: center;

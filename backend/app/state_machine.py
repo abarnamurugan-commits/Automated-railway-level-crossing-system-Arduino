@@ -26,6 +26,7 @@ T_CLOSING = 0.98        # servo travel to closed
 T_LOCKOUT = 0.32        # debounce delay after departure press
 T_SAFETY_CHECK = 1.60   # TRAIN_CLEARED safety pause
 T_OPENING = 1.06        # servo travel to open
+TOTAL_CLOSE_TIME = T_APPROACHING + T_CLOSING  # total time from arrival to gate fully closed
 
 
 class RailwayCrossing:
@@ -37,6 +38,17 @@ class RailwayCrossing:
         self.buzzer = False
         self._lock = asyncio.Lock()
         self._log_event = log_event  # async callable(state, note) -> writes SQLite + notifies websockets
+        self._arrival_started_at = None  # innovation feature: powers the ETA countdown
+
+    def eta_seconds(self):
+        """Seconds remaining until the gate is fully closed. None outside the closing window."""
+        if self.state not in (State.TRAIN_APPROACHING, State.GATE_CLOSING):
+            return None
+        if self._arrival_started_at is None:
+            return None
+        elapsed = time.time() - self._arrival_started_at
+        remaining = TOTAL_CLOSE_TIME - elapsed
+        return round(max(remaining, 0), 1)
 
     def snapshot(self):
         return {
@@ -45,6 +57,7 @@ class RailwayCrossing:
             "red_led": self.red_led,
             "green_led": self.green_led,
             "buzzer": self.buzzer,
+            "eta": self.eta_seconds(),
             "ts": time.time(),
         }
 
@@ -55,6 +68,7 @@ class RailwayCrossing:
             return self.snapshot()
 
         async with self._lock:
+            self._arrival_started_at = time.time()
             self.state = State.TRAIN_APPROACHING
             self.red_led, self.green_led, self.buzzer = True, False, True
             await self._log_event(self.state, "train approaching detected")
@@ -66,6 +80,7 @@ class RailwayCrossing:
 
             self.gate_angle = 90
             self.state = State.TRAIN_CROSSING
+            self._arrival_started_at = None
             await self._log_event(self.state, "gate closed, road blocked, train crossing")
 
         return self.snapshot()

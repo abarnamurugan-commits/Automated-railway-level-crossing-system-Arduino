@@ -54,8 +54,12 @@ export default function App() {
     ws.onclose = () => setConnected(false)
     ws.onmessage = (event) => {
       const payload = JSON.parse(event.data)
-      setStatus((prev) => ({ ...prev, state: payload.state }))
-      refreshLogs()
+      setStatus((prev) => ({ ...prev, state: payload.state, eta: payload.eta }))
+      // eta ticks arrive every 0.2s and don't need a log refresh; only
+      // refresh the log table when the state itself actually changed
+      if (payload.eta === null || payload.eta === undefined) {
+        refreshLogs()
+      }
     }
     return () => ws.close()
   }, [])
@@ -79,6 +83,9 @@ export default function App() {
         <div className="badge" style={{ background: meta.color }}>
           {meta.label}
         </div>
+        {typeof status.eta === 'number' && (
+          <div className="eta">Gate closing in {status.eta.toFixed(1)}s</div>
+        )}
         <GateIcon state={status.state} />
         <button onClick={runDemo}>Simulate train</button>
       </section>
