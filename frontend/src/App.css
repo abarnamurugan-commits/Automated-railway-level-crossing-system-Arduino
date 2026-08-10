@@ -1,0 +1,91 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #14161a;
+  color: #e8e8e6;
+}
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+h1 { font-size: 20px; font-weight: 500; margin: 0; }
+h2 { font-size: 16px; font-weight: 500; margin: 24px 0 12px; }
+.ws-dot {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #2a2d33;
+}
+.ws-dot.live { color: #5dcaa5; }
+.ws-dot.down { color: #f09595; }
+
+.status-panel {
+  background: #1c1f24;
+  border: 1px solid #2a2d33;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.badge {
+  color: white;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.gate-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 90px;
+}
+.gate-post {
+  width: 8px;
+  height: 70px;
+  background: #55575c;
+  border-radius: 2px;
+}
+.gate-barrier {
+  width: 140px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #d85a30 0 14px, #f1efe8 14px 28px);
+  border-radius: 4px;
+  transform-origin: left center;
+  transition: transform 0.9s ease-in-out;
+}
+
+button {
+  background: #378add;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+button:hover { background: #2e73b8; }
+
+.log-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.log-panel th, .log-panel td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #2a2d33;
+}
+.log-panel th { color: #9c9a92; font-weight: 500; }
