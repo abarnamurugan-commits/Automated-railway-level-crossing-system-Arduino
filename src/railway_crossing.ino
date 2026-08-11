@@ -11,6 +11,15 @@
   Green LED -> D5
   Buzzer    -> D8
 
+  LCD 16x2 (parallel mode):
+    RS -> D12
+    E  -> D11
+    D4 -> D7
+    D5 -> A0
+    D6 -> A1
+    D7 -> A2
+    (VSS->GND, VDD->5V, V0->pot wiper, A->5V, K->GND)
+
   SEQUENCE:
 
   NORMAL
@@ -32,8 +41,12 @@
 */
 
 #include <Servo.h>
+#include <LiquidCrystal.h>
 
 Servo gateServo;
+
+// LCD pins: RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(12, 11, 7, A0, A1, A2);
 
 // ---------------- PIN CONFIGURATION ----------------
 
@@ -82,7 +95,25 @@ void setup()
 
   Serial.begin(9600);
 
+  lcd.begin(16, 2);
+  lcd.print("Railway Crossing");
+  lcd.setCursor(0, 1);
+  lcd.print("System Booting..");
+  delay(1500);
+  lcd.clear();
+
   setNormalState();
+}
+
+// ---------------- LCD HELPER ----------------
+
+void showStatus(String line1, String line2)
+{
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(line1);
+  lcd.setCursor(0, 1);
+  lcd.print(line2);
 }
 
 // ---------------- MAIN LOOP ----------------
@@ -137,6 +168,8 @@ void loop()
 
       tone(PIN_BUZZER, 1000);
 
+      showStatus("Train Approach!", "Gate closing soon");
+
       // Give road users warning time
       delay(2000);
 
@@ -156,6 +189,8 @@ void loop()
       Serial.println("Please stop road traffic.");
 
       gateServo.write(GATE_CLOSED_ANGLE);
+
+      showStatus("Gate: CLOSING", "Stop traffic");
 
       // Allow servo to reach closed position
       delay(1000);
@@ -196,6 +231,8 @@ void loop()
 
       // Keep gate physically closed
       gateServo.write(GATE_CLOSED_ANGLE);
+
+      showStatus("GATE: CLOSED", "Train crossing");
 
       // Clear and simple status message
       Serial.println();
@@ -241,6 +278,8 @@ void loop()
       // Stop warning after train has cleared
       noTone(PIN_BUZZER);
 
+      showStatus("Safety Check...", "Please wait");
+
       delay(1500);
 
       Serial.println("Safety check completed.");
@@ -262,6 +301,8 @@ void loop()
       Serial.println("GATE OPENING...");
 
       gateServo.write(GATE_OPEN_ANGLE);
+
+      showStatus("Gate: OPENING", "Traffic resuming");
 
       delay(1000);
 
@@ -293,6 +334,8 @@ void setNormalState()
   digitalWrite(PIN_GREEN, HIGH);
 
   noTone(PIN_BUZZER);
+
+  showStatus("Status: NORMAL", "Waiting train..");
 
   Serial.println();
   Serial.println("--------------------------------");
