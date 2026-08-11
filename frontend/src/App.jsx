@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 
 const API_BASE = 'http://localhost:8000'
 const WS_URL = 'ws://localhost:8000/ws/status'
-
+<p className="hardware-note">
+  This dashboard mirrors the Tinkercad Arduino simulation's logic. 
+  The physical circuit also includes a 16x2 LCD showing live status text — see the Tinkercad demo for the full hardware view.
+</p>
 const STATE_META = {
   NORMAL: { label: 'Normal — road clear', color: '#1d9e75' },
   TRAIN_APPROACHING: { label: 'Train approaching', color: '#ba7517' },
