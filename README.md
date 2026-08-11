@@ -12,6 +12,12 @@ An Arduino Uno circuit (simulated in Tinkercad) runs a finite state machine that
 
 A parallel software demo layer (Python backend + React frontend) mirrors the same state machine logic for presentation purposes outside the simulator.
 
+## Tinkercad Simulation
+
+🔗 **Live circuit:** [Automated Railway Level Crossing — Tinkercad](https://www.tinkercad.com/things/7dJf7NdIG3R-automated-railway-level-crossing-system?sharecode=dy-jZx3d7Z0WLYDDXqx9CKfPAcqPZOhexVePSrBiWsQ)
+
+Open the link, click **Start Simulation**, and use the pushbuttons to simulate a train arriving/departing to see the full gate → warning → reopen sequence.
+
 ## Architecture
 
 ```
