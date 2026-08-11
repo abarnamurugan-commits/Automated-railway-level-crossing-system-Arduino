@@ -1,104 +1,34 @@
-# Explainer — for the team
+# Explainer 
 
-Read this before the demo. It's written so anyone on the team can explain
-the project to a judge, even without having touched the code.
+Hi, thanks for looking at our submission. Here's what we built and why we built it this way.
 
-## The problem, in one line
+## What this is
 
-A train is coming. The gate needs to close before it arrives, warn people,
-stay closed while the train crosses, then reopen safely — even if someone
-mashes the buttons or a second train "arrives" too soon.
+We built an Automated Railway Level Crossing System for Track 2 — Tinkercad/Arduino. It's a working Arduino simulation that detects a train approaching, closes the gate, warns road users with lights and sound, blocks traffic while the train crosses, and reopens the gate automatically once the train has safely passed.
 
-## What we actually built
+## How to see it work
 
-Three things, all doing the *same* logic, at three different levels:
+Open the Tinkercad circuit and hit simulate. Press the **approach button** — you'll see the red LED and buzzer activate, the LCD update to show the warning, and after a short delay the gate servo swings closed. While the gate is closed, you can press the approach button again as many times as you like — nothing happens, because the system is designed to only respond to the **departure button** while a train is on the crossing. Press departure, and you'll see a brief safety-check pause on the LCD before the gate reopens and the system resets to normal.
 
-1. **A Tinkercad circuit** — a real Arduino Uno simulation. A servo motor
-   acts as the gate. Two buttons simulate a train arriving and a train
-   leaving. Red/green LEDs and a buzzer show status. This proves the
-   embedded-systems logic actually works, cycle by cycle, with real timing.
+## Why we made the choices we did
 
-2. **A backend (FastAPI)** — a Python service that runs the *identical*
-   sequence of states as the Arduino code. It logs every step to a database
-   and can answer "what's happening right now?" over the web.
+**The state machine has six states**, not just "open" and "closed." We did this on purpose — `NORMAL`, `TRAIN_APPROACHING`, `GATE_CLOSING`, `TRAIN_CROSSING`, `TRAIN_CLEARED`, `GATE_OPENING`. Splitting it out this way makes each phase's behavior explicit and testable, and it's what let us build in the safety guard: **the `TRAIN_CROSSING` state can only be exited by the departure sensor.** We treated that as the most important safety property in the whole system — repeated or accidental approach signals while a train is present must never reopen the gate early.
 
-3. **A frontend dashboard (React)** — a webpage that shows the current
-   status live: a colored badge, an animated gate, a countdown before the
-   gate closes, and a scrolling log of everything that's happened.
+**We added a 16x2 LCD** on top of the base LED/buzzer signaling, because we wanted status information that's readable at a glance without needing to open the Serial Monitor. Every state writes a two-line status message to it, so you can watch the full sequence play out just by reading the screen.
 
-## The one thing to say clearly if a judge asks "is this connected to the Arduino?"
+**We also built a small software layer** — a Python backend and a React dashboard — that reproduces the exact same state machine logic in a web interface. We want to be upfront about this: **it is not live-connected to the Tinkercad circuit.** Tinkercad doesn't support streaming a running simulation's state out to an external app without extra bridging hardware, which is outside the scope of a software-only submission. So we built it as a second, independent implementation of the same design, to show the logic in a format that's easy to browse. We consider it a bonus feature, not the core deliverable — the Arduino simulation is the thing that actually satisfies the problem statement on its own.
 
-**No — and that's a deliberate, explainable choice, not something to hide.**
+## Quick feature checklist, if it helps
 
-Tinkercad runs entirely in the browser. It has no way to send live signals
-to a server running on someone's laptop — there's no cable, no serial link,
-nothing physical connecting them. So instead, the backend runs its own copy
-of the exact same state machine, and clicking "Simulate train" on the
-dashboard triggers that copy, timed to match what we measured in the actual
-Tinkercad run (2.93 seconds to close, 2.98 seconds to reopen).
+- Detects train arrival and departure — via approach/departure buttons standing in for IR/ultrasonic sensors
+- Closes the gate automatically before the train reaches the crossing
+- Warns with red/green LEDs and a buzzer
+- Blocks road traffic for the full duration the gate is closed
+- Reopens the gate automatically once the train has departed
+- Shows live status on the LCD and Serial Monitor
+- Handles repeated/rapid button presses safely, without unsafe reopening
 
-**If asked, say this:** *"The dashboard demonstrates the same safety logic as
-the circuit, running on the same timing — it's a software mirror of the
-Arduino logic, not a live feed from the physical simulation, since Tinkercad
-can't provide one."* That's an honest, engineering-grounded answer. Judges
-respect knowing your system's real boundaries far more than a vague claim
-that everything is "connected."
-
-## The sequence, step by step
-
-```
-NORMAL              gate open, green light, road clear
-   |
-   |  (a train is detected)
-   v
-TRAIN_APPROACHING    red light + buzzer turn on, countdown starts
-   |
-   v
-GATE_CLOSING          gate physically closes
-   |
-   v
-TRAIN_CROSSING        gate locked shut -- nothing can reopen it early
-   |
-   |  (the train has left)
-   v
-TRAIN_CLEARED         short safety pause before reopening
-   |
-   v
-GATE_OPENING          gate opens
-   |
-   v
-NORMAL (again)
-```
-
-## Why it's safe, not just functional
-
-- **While a train is crossing, a second "arrival" is ignored completely.**
-  We tested this by repeatedly pressing the arrival button mid-crossing --
-  nothing happens until the real departure signal comes in.
-- **A departure only counts if a train is actually marked as crossing.**
-  You can't skip straight from "normal" to "gate opening."
-- **A short delay after departure detection** stops a single button press
-  from being read as two events.
-
-## Why there's an "innovation" feature
-
-The live countdown ("gate closing in 1.4s...") isn't just decoration -- it's
-a genuine improvement over a system that silently closes the gate. It gives
-road users visible warning time, which is exactly what the evaluation
-criteria ask for under "innovation and additional features."
-
-## Quick answers for common judge questions
-
-- **"Why Arduino if you're also using a web stack?"** -- The problem
-  statement is Arduino-based. The web stack exists to demonstrate the same
-  logic in an observable, inspectable way, and to add a real-time UI layer
-  on top of the embedded system.
-- **"What happens with multiple trains?"** -- Covered above: the system
-  ignores overlapping/duplicate detection events by design, and only reacts
-  to the correct signal at the correct state.
-- **"Is this running on real hardware right now?"** -- No. It's a Tinkercad
-  simulation plus a software demo layer, exactly as scoped for a
-  software-only hackathon submission.
+Happy to walk through the code or answer anything live — thanks for your time.
 
 ## Where everything lives
 
