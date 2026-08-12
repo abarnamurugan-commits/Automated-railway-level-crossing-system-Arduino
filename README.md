@@ -2,6 +2,19 @@
 
 **Track 2 — Tinkercad (Arduino)**
 
+## Team Information
+
+| Field | Details |
+|---|---|
+| Team Name | Nexora |
+| Team Number | 44 |
+| Team Members | M. Abarna (Team Lead)
+R. Hemalatha 
+A. Myeisha
+K. Nethra
+K. Srima
+S. Nithya Lakshmi |
+
 ## Problem Statement
 
 Railway level crossings are critical points where railway tracks intersect with roads. Manual gate operation can cause delays or accidents. This project automates that process: detecting an approaching train, closing the gate, warning road users, and safely reopening the gate once the train has passed.
