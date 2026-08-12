@@ -8,12 +8,12 @@
 |---|---|
 | Team Name | Nexora |
 | Team Number | 44 |
-| Team Members | M. Abarna (Team Lead)
-R. Hemalatha 
-A. Myeisha
-K. Nethra
-K. Srima
-S. Nithya Lakshmi |
+| Team Members :| M. Abarna (Team Lead)|
+|               | R. Hemalatha |
+|                | A. Myeisha |
+|               | K. Nethra |
+|               | K. Srima |
+|              | S. Nithya Lakshmi |
 
 ## Problem Statement
 
